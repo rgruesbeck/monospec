@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ -z "${MONOSPEC_ROOT:-}" ]]; then
+  echo "error: MONOSPEC_ROOT is not set. Run install.sh to configure." >&2
+  exit 1
+fi
+
+cmd="${1:-}"
+shift || true
+
+case "$cmd" in
+  init)
+    if [[ -n "${1:-}" ]]; then
+      project_name="$1"
+      shift
+    else
+      project_name="$(basename "$PWD")"
+    fi
+    target="$MONOSPEC_ROOT/projects/$project_name/openspec"
+
+    if [[ -e "./openspec" ]]; then
+      echo "error: ./openspec already exists in the current directory." >&2
+      exit 1
+    fi
+
+    mkdir -p "$target"
+    ln -s "$target" ./openspec
+    echo "initialized: $target"
+    echo "symlinked:   $(pwd)/openspec -> $target"
+    openspec init "$@"
+    ;;
+  *)
+    echo "usage: monospec <command> [args]"
+    echo ""
+    echo "commands:"
+    echo "  init [project-name]   initialize openspec for a project (defaults to current dir name)"
+    exit 1
+    ;;
+esac
