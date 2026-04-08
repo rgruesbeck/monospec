@@ -11,12 +11,15 @@ if [[ "$SHELL" == */zsh ]]; then
   SHELL_RC="$HOME/.zshrc"
 elif [[ "$SHELL" == */bash ]]; then
   SHELL_RC="$HOME/.bashrc"
+elif [[ "$SHELL" == */fish ]]; then
+  SHELL_RC="$HOME/.config/fish/config.fish"
 else
   SHELL_RC="$HOME/.profile"
 fi
 
 # Create ~/.local/bin if needed
 mkdir -p "$BIN_DIR"
+mkdir -p "$(dirname "$SHELL_RC")"
 
 # Symlink the script so updates to the repo are reflected immediately
 if [[ -L "$SCRIPT_DEST" ]]; then
@@ -34,8 +37,13 @@ append_if_absent() {
   fi
 }
 
-append_if_absent "MONOSPEC_ROOT" "export MONOSPEC_ROOT=\"$MONOSPEC_ROOT\"  # monospec"
-append_if_absent "monospec:PATH" "export PATH=\"\$HOME/.local/bin:\$PATH\"  # monospec:PATH"
+if [[ "$SHELL" == */fish ]]; then
+  append_if_absent "MONOSPEC_ROOT" "set -gx MONOSPEC_ROOT \"$MONOSPEC_ROOT\"  # monospec"
+  append_if_absent "monospec:PATH" "fish_add_path \$HOME/.local/bin  # monospec:PATH"
+else
+  append_if_absent "MONOSPEC_ROOT" "export MONOSPEC_ROOT=\"$MONOSPEC_ROOT\"  # monospec"
+  append_if_absent "monospec:PATH" "export PATH=\"\$HOME/.local/bin:\$PATH\"  # monospec:PATH"
+fi
 
 echo "installed:      $SCRIPT_DEST -> $SCRIPT_SRC"
 echo "MONOSPEC_ROOT:  $MONOSPEC_ROOT"
