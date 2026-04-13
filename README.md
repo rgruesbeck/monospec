@@ -1,6 +1,6 @@
 # monospec
 
-A monorepo for storing [OpenSpec](https://github.com/Fission-AI/OpenSpec) directories across multiple projects. Each project gets its own `openspec/` directory here, symlinked from the project's working directory.
+Store all [OpenSpec](https://github.com/Fission-AI/OpenSpec) directories in a single repo. Each project gets its own `openspec/` directory here, symlinked from the project's working directory.
 
 ## Install
 
