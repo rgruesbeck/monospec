@@ -28,6 +28,13 @@ case "$cmd" in
     ln -s "$target" ./openspec
     echo "initialized: $target"
     echo "symlinked:   $(pwd)/openspec -> $target"
+
+    gitignore="./.gitignore"
+    if ! grep -qxF '/openspec' "$gitignore" 2>/dev/null; then
+      echo '/openspec' >> "$gitignore"
+      echo "gitignore:   added /openspec to $gitignore"
+    fi
+
     openspec init "$@"
     ;;
   *)
