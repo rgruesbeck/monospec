@@ -19,9 +19,43 @@ case "$cmd" in
     fi
     target="$MONOSPEC_ROOT/projects/$project_name/openspec"
 
-    if [[ -e "./openspec" ]]; then
-      echo "error: ./openspec already exists in the current directory." >&2
-      exit 1
+    if [[ -L "./openspec" ]]; then
+      existing_target="$(readlink "./openspec")"
+      if [[ "$existing_target" == "$target" ]]; then
+        echo "already initialized: ./openspec -> $target"
+        exit 0
+      else
+        echo "error: ./openspec is already a symlink pointing to $existing_target" >&2
+        echo "       Remove it manually if you want to reinitialize." >&2
+        exit 1
+      fi
+    elif [[ -e "./openspec" ]]; then
+      echo "An openspec directory already exists at $(pwd)/openspec."
+      echo ""
+      echo "  1) Start fresh      — delete the existing directory and run openspec init"
+      echo "  2) Move to monospec — migrate the existing directory to $target"
+      echo ""
+      read -rp "Choose [1/2]: " choice
+      case "$choice" in
+        1)
+          rm -rf ./openspec
+          ;;
+        2)
+          mv ./openspec "$target"
+          ln -s "$target" ./openspec
+          echo "migrated:    $(pwd)/openspec -> $target"
+          gitignore="./.gitignore"
+          if ! grep -qxF '/openspec' "$gitignore" 2>/dev/null; then
+            echo '/openspec' >> "$gitignore"
+            echo "gitignore:   added /openspec to $gitignore"
+          fi
+          exit 0
+          ;;
+        *)
+          echo "Aborted." >&2
+          exit 1
+          ;;
+      esac
     fi
 
     mkdir -p "$target"
